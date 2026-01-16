@@ -6,6 +6,8 @@ Proyek pengembangan sistem operasi minimal 16-bit x86 yang ditulis dalam C dan A
 
 Ini adalah sistem operasi bootable yang masih dalam tahap pengembangan, berjalan di real mode (16-bit) dengan rencana transisi ke protected mode (32-bit). Saat ini fokus pada implementasi fungsi inti sistem dan interfacing hardware.
 
+![brief]("./preview/image.png)
+
 ## Status Saat Ini
 
 ### Fitur yang Sudah Diimplementasikan
