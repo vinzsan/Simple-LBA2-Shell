@@ -21,6 +21,7 @@ static unsigned short putchars(char c,unsigned char color){
     return (((unsigned char)color << 8) | c);
 }
 
+__attribute__((deprecated("fungsi ini menggunakan BIOS caller")))
 static inline void set_cursor(unsigned char row,unsigned char col){
     //register unsigned short _pos asm("dx") = ((pos & 0x0000FFFF) | (pos >> 16) << 16) | ((pos & 0xFFFF0000) | (pos &0xFFFF));
     __asm__ __volatile__(

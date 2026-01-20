@@ -2,6 +2,8 @@
 //#include "../include/ioport.h"
 #include "../include/vga_dma.h"
 #include "../include/a20_gate.h"
+#include "../include/string.h"
+#include "../include/interrupt.h"
 
 //#include "../include/igdt.h"
 
@@ -13,14 +15,6 @@ __asm__(".code16gcc");
 
 static char BOOT_DRIVE = 0;
 char char_buffer[CHAR_BUFFER_SIZE] = {0};
-
-__attribute__((section(".text")))
-void clear(){
-    __asm__ __volatile__(
-        "mov $0x0003,%%ax\n\tint $0x10\n\t"
-        :::"ax"
-    );
-}
 
 /*
 
@@ -36,44 +30,10 @@ void clear(){
     
     Shutdown tidak bisa di gunakan untuk board asli,karena hanya reserve dari
     IN OUT milik QEMU di port 0x604/0x2000
+
+    Do what you want.
     
 */
-
-/*  break info biar ndak kena brief dari charcmp */
-short charcmp(char *buffer,char *src){
-    for(short i = 0;buffer[i] == src[i];i++){
-        if(buffer[i] == '\0'){
-            return 0;
-        }
-    }
-    return 1;
-}
-
-static inline void shutdown(){
-    __asm__ __volatile__(
-        "movw $0x2000,%%ax\n\t"
-        "movw $0x604,%%dx\n\t"
-        "outw %%ax,%%dx\n\t"
-        :::"ax","dx"
-    );
-}
-
-char *short2char_arr(short n){
-    static char s2a_buffer[32];
-    char *p = s2a_buffer + sizeof(s2a_buffer);
-    unsigned short x;
-    *--p = '\0';
-    x = (n < 0) ? (unsigned short)(-n) : (unsigned short)n;
-    
-    do {
-        *--p = '0' + (x % 10);
-        x /= 10;
-    } while(x);
-    if(n < 0){
-        *--p = '-';
-    }
-    return p;
-}
 
 __attribute__((section(".boot_entry")))
 void _start(){
