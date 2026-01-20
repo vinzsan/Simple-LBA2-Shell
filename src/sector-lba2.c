@@ -1,5 +1,5 @@
-#include "../include/pit_channel.h"
-#include "../include/ioport.h"
+//#include "../include/pit_channel.h"
+//#include "../include/ioport.h"
 #include "../include/vga_dma.h"
 #include "../include/a20_gate.h"
 
@@ -28,10 +28,18 @@ void clear(){
     INFO : Karena switch ke VGA buffer untuk proses visual
     jadi tidak boleh mencampur aduk menggunakan Interrupt BIOS,
     untuk ekosistem jangka panjang misal setelah switch ke 32 bit mode
-    tidak ada layanan BIOS
+    tidak ada layanan BIOS,cuman ini masih stay di 16 bit mode.
+
+    Layanan PIT tidak berfungsi dan masih crash,terkadang IRQ terganggu,dan tidak
+    Jadi beberapa Header yang di comment memang masih belum layak di gunakan,dan
+    kode semakin berantakan.
+    
+    Shutdown tidak bisa di gunakan untuk board asli,karena hanya reserve dari
+    IN OUT milik QEMU di port 0x604/0x2000
     
 */
 
+/*  break info biar ndak kena brief dari charcmp */
 short charcmp(char *buffer,char *src){
     for(short i = 0;buffer[i] == src[i];i++){
         if(buffer[i] == '\0'){
@@ -84,7 +92,7 @@ void _start(){
     );
     clear();
     
-    pit_init();
+    //pit_init_irq();
     print_vga("Welcome to x86_16 shell\n", 0x1A);
     unsigned short line = 0;
     unsigned char color_change = 0x0F;
@@ -147,14 +155,11 @@ void _start(){
         else if(!charcmp(char_buffer,"shutdown")){
             shutdown();
         }
-        else if(!charcmp(char_buffer,"debug-mode")){
-            print_vga("You re already in debug mode?\n", 0x0F);
-        }
         else if(!charcmp(char_buffer,"help")){
             print_vga("x86_16 Simple Shell\nversion 0.1 (debug mode)\n\n \
             -print      for show hello world text\n \
             -shutdown   for shutdown virtual (not APM)\n \
-            -debug-mode for showing debug status\n \
+            -clear      for clearthe terminal\n \
             \n",0x0F);
         }
         else if(!charcmp(char_buffer, "change-color")){
@@ -174,20 +179,7 @@ void _start(){
             color_change = 0x0F;
             clear_screen_vga(0x0F);
             print_vga("reset terminal\n", 0x0F);
-            pit_sleep(1);
-        }
-        else if(!charcmp(( char_buffer),"sometimes")){
-            /*
-                Just for testing PIT_sleep
-            */
-            print_vga("Sometimes we just need nothin.\n", 0x0F);
-            pit_sleep(3);
-            print_vga("But, we dont know really what people want to\n", 0x0F);
-            pit_sleep(3);
-        }
-        else if(!charcmp(char_buffer,"expand-memory")){
-            print_vga("[INFO] : Trying to expand\n", 0x0F);
-            enable_a20();
+            //pit_sleep(1);
         }
         else if(!charcmp(char_buffer,"show-stack-pointer")){
             print_vga("[INFO] : stack pointer current : ", 0x0F);
@@ -195,6 +187,13 @@ void _start(){
             putchar_vga('\n', 0x0F);
             print_vga(short2char_arr(BOOT_DRIVE), 0x0F);
             putchar_vga('\n', 0x0F);
+        }
+        else if(!charcmp(char_buffer, "convert")){
+            unsigned short pos = 0;
+            char buffer_clone[32];
+            for(short i = 0;char_buffer[i] != ';';i++){
+                pos++;
+            }
         }
         else {
             print_vga(char_buffer, 0x0F);

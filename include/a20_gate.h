@@ -24,9 +24,9 @@ static inline unsigned short stack_pointer_offset(){
     return sp_off;
 }
 
-static void enable_a20(){
-    unsigned char al = in_byte(A20_PORT);
-    out_byte(A20_PORT, (al | 0b00000010));
-}
+// static void enable_a20(){
+//     unsigned char al = in_byte(A20_PORT);
+//     out_byte(A20_PORT, (al | 0b00000010));
+// }
 
 #endif

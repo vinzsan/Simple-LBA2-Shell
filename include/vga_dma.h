@@ -14,7 +14,7 @@ static char scancode_to_ascii[128] = {
     '\t','q','w','e','r','t','y','u','i','o','p','[',']','\n',
     0, 'a','s','d','f','g','h','j','k','l',';','\'','`',
     0, '\\','z','x','c','v','b','n','m',',','.','/', 0,
-    '*', 0,' ','\r','?'
+    '*', 0,' '
 };
 
 static unsigned short putchars(char c,unsigned char color){
@@ -91,7 +91,7 @@ static unsigned char keyboard_read_scancode(){
     return in_byte(0x60);
 }
 
-static unsigned char putchar_vga(char c,unsigned char color){
+static inline unsigned char putchar_vga(char c,unsigned char color){
     if(c == '\0') return 0;
     if(c == '\n'){
         POSITION &= 0xFFFF0000;

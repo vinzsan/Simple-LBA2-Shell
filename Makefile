@@ -9,7 +9,7 @@ all: os.img
 build:
 
 	$(COLLECTION_i386)-gcc -m16 src/sector-lba2.c -o sector-lba2.o -c -static -fno-stack-protector -fno-pie -fno-pic -fomit-frame-pointer -Wall \
-	-ffreestanding -nostdlib -nostartfiles
+	-ffreestanding -nostdlib -nostartfiles -O3 -g
 
 	$(COLLECTION_i386)-ld -T link.ld sector-lba2.o -o sector-lba2.elf -static 
 	$(COLLECTION_i386)-objcopy -O binary sector-lba2.elf sector-lba2.bin

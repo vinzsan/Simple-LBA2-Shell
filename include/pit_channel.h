@@ -23,26 +23,29 @@
 #define PIT_BINARY   (0 << 0)
 #define PIT_BCD      (1 << 0)
 
+static volatile unsigned int pit_ticks = 0;
+
 static inline void pit_init(){
-    unsigned char cmd = PIT_CH0 | PIT_LSB_MSB | PIT_MODE3 | PIT_BINARY;
+    register unsigned char cmd = PIT_CH0 | PIT_LSB_MSB | PIT_MODE3 | PIT_BINARY;
     out_byte(PIT_PORT,cmd);
 
-    out_byte(PIT_DATA,0xFFFF & 0xFF);
-    out_byte(PIT_DATA,0xFFFF >> 8);
+    unsigned short divisor = 1193;
+    out_byte(PIT_DATA,divisor & 0xFF);
+    out_byte(PIT_DATA,divisor >> 8);
 }
 
 static inline unsigned short pit_counter(){
     out_byte(PIT_PORT, PIT_CH0 | PIT_LATCH);
 
-    unsigned char MSB_ = in_byte(0x40);
-    unsigned char LSB_ = in_byte(0x40);
+    register unsigned char LSB_ = in_byte(0x40);
+    register unsigned char MSB_ = in_byte(0x40);
 
     return (LSB_ << 8) | MSB_;
 }
 
 static void pit_sleep(unsigned int milis){
-    unsigned int ticks = milis * PIT_HZ;
-    unsigned short start,current;
+    register unsigned int ticks = milis * PIT_HZ;
+    register unsigned short start = 0,current = 0;
 
     start = pit_counter();
 
@@ -52,6 +55,25 @@ static void pit_sleep(unsigned int milis){
             ticks -= (start - current);
         else ticks -= (start + (0xFFFF - current));
         start = current;
+    }
+}
+
+static inline void pit_init_irq(){
+    out_byte(PIT_PORT, PIT_CH0 | PIT_LSB_MSB | PIT_MODE2 | PIT_BINARY);
+    
+    unsigned short divisor = 1193;
+    out_byte(PIT_DATA, divisor & 0xFF);
+    out_byte(PIT_DATA, divisor >> 8);
+}
+
+static inline void pit_irq_handler(){
+    pit_ticks++;
+}
+
+static void pit_sleep_irq(unsigned int milis){
+    unsigned long target = pit_ticks + milis;
+    while(pit_ticks < target){
+        __asm__ volatile("hlt");
     }
 }
 
