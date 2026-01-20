@@ -1,32 +1,32 @@
 [BITS 16]
 [ORG 0x7C00]
 
-BOOT_DRIVE_BUF: db 0        ; BOOT DRIVE static block buat simpen state si DL register
-SECTOR2_OFFSET equ 0x9000   ; Dari awal boot atau masuk ke offset mem 0x7C00 DL udah simpen state sector sectornya
-SECTOR2_SEGMENT equ 0x0000  ; Trus 0x9000 ini buat offset jmp ke sector2/stage2,segment bisa di null in
+BOOT_DRIVE_BUF: db 0
+SECTOR2_OFFSET equ 0x9000 ; Default 0x8000 cuman saya ganti jadi 0x9000 TwT
+SECTOR2_SEGMENT equ 0x0000
 
 _start:
 
     cli
     
-    mov byte [BOOT_DRIVE_BUF],dl    ; Disini statenya di simpan dari DL
+    mov byte [BOOT_DRIVE_BUF],dl
     
-    xor ax,ax   ; Bersihin AX cuman buat place holder
-    mov es,ax   ; BERSIHIN SEMUA REGISTER SEGMENT,(WAJIB)
-    mov ds,ax   ; ES,DS,SS,FS,GS dll
+    xor ax,ax
+    mov es,ax
+    mov ds,ax
     mov ss,ax
 
-    mov sp,0x7C00   ; set stack dari 0x7C00
-    sti             ; Enable INT
+    mov sp,0x7C00
+    sti
     
-    mov ax,0x0003   ; Clear layar
+    mov ax,0x0003
     int 0x10
     
     mov ah,0x02
-    mov al,SECTOR_COUNT ; Jumlah Sector yang mau di muat
-    xor ch,ch           ; INI critical section sih,coba aku demons langsung disini aja
-    mov cl,2            ; Jadi nanti ada beberapa kode yang nggak di load sama memory,namun kodenya ada
-    xor dh,dh   
+    mov al,SECTOR_COUNT
+    xor ch,ch
+    mov cl,2
+    xor dh,dh
     
     mov dl,byte [BOOT_DRIVE_BUF]
     mov bx,SECTOR2_SEGMENT
